@@ -5,12 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/Layout";
 
 const ShipmentDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedStatus, setSelectedStatus] = useState("En tránsito");
+  const [deliveryConfirmed, setDeliveryConfirmed] = useState(false);
+  const [observation, setObservation] = useState("");
 
   // Mock data - in real app would fetch based on id
   const shipment = {
@@ -27,8 +34,48 @@ const ShipmentDetail = () => {
   };
 
   const handleUpdateStatus = () => {
-    // Mock update functionality
-    console.log("Updating status to:", selectedStatus);
+    // Check if delivery confirmation is required for "Entregado" status
+    if (selectedStatus === "Entregado" && !deliveryConfirmed) {
+      toast({
+        variant: "destructive",
+        title: "Confirmación requerida",
+        description: "Debe confirmar la entrega para continuar"
+      });
+      return;
+    }
+
+    // Check if observation is required for "Novedad" status
+    if (selectedStatus === "Novedad" && !observation.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Observación requerida",
+        description: "Debe registrar una observación para continuar"
+      });
+      return;
+    }
+
+    // Mock update functionality - in real app would make API call
+    const updateData = {
+      status: selectedStatus,
+      ...(selectedStatus === "Entregado" && { deliveryDate: new Date().toISOString() }),
+      ...(selectedStatus === "Novedad" && { observation: observation.trim() })
+    };
+    
+    console.log("Updating shipment:", updateData);
+    
+    // Show success message
+    toast({
+      title: "Estado actualizado",
+      description: "El estado del envío ha sido actualizado con éxito"
+    });
+
+    // Reset form states after successful update
+    if (selectedStatus === "Entregado") {
+      setDeliveryConfirmed(false);
+    }
+    if (selectedStatus === "Novedad") {
+      setObservation("");
+    }
   };
 
   return (
@@ -104,6 +151,36 @@ const ShipmentDetail = () => {
                     <SelectItem value="Novedad">Novedad</SelectItem>
                   </SelectContent>
                 </Select>
+
+                {/* Delivery confirmation for "Entregado" status */}
+                {selectedStatus === "Entregado" && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="delivery-confirm" 
+                      checked={deliveryConfirmed}
+                      onCheckedChange={(checked) => setDeliveryConfirmed(!!checked)}
+                    />
+                    <Label htmlFor="delivery-confirm" className="text-sm">
+                      Confirmar entrega del paquete
+                    </Label>
+                  </div>
+                )}
+
+                {/* Observation field for "Novedad" status */}
+                {selectedStatus === "Novedad" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="observation" className="text-sm font-medium">
+                      Observación *
+                    </Label>
+                    <Textarea
+                      id="observation"
+                      placeholder="Describe la novedad (ej: dirección incorrecta, destinatario ausente...)"
+                      value={observation}
+                      onChange={(e) => setObservation(e.target.value)}
+                      className="min-h-[80px]"
+                    />
+                  </div>
+                )}
                 
                 <Button className="w-full" onClick={handleUpdateStatus}>
                   Actualizar Estado
