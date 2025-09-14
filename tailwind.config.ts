@@ -47,6 +47,12 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        status: {
+          pending: "hsl(var(--status-pending))",
+          transit: "hsl(var(--status-transit))",
+          delivered: "hsl(var(--status-delivered))",
+          novedad: "hsl(var(--status-novedad))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -57,6 +63,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      backgroundImage: {
+        "gradient-primary": "var(--gradient-primary)",
+        "gradient-card": "var(--gradient-card)",
+      },
+      boxShadow: {
+        "card": "var(--shadow-card)",
+        "elevated": "var(--shadow-elevated)",
       },
       borderRadius: {
         lg: "var(--radius)",
