@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CitySelector } from "@/components/CitySelector";
 import Layout from "@/components/Layout";
 
 const Shipments = () => {
@@ -16,6 +17,23 @@ const Shipments = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<any>(null);
+
+  // Form states for create modal
+  const [createForm, setCreateForm] = useState({
+    origin: "",
+    destination: "",
+    weight: "",
+    priority: "Normal",
+  });
+
+  // Form states for edit modal
+  const [editForm, setEditForm] = useState({
+    origin: "",
+    destination: "",
+    weight: "",
+    priority: "",
+    status: "",
+  });
 
   const [shipments] = useState([
     {
@@ -58,7 +76,35 @@ const Shipments = () => {
 
   const handleEdit = (shipment: any) => {
     setSelectedShipment(shipment);
+    setEditForm({
+      origin: shipment.origin,
+      destination: shipment.destination,
+      weight: shipment.weight,
+      priority: shipment.priority,
+      status: shipment.status,
+    });
     setShowEditModal(true);
+  };
+
+  const handleCreateModalClose = () => {
+    setShowCreateModal(false);
+    setCreateForm({
+      origin: "",
+      destination: "",
+      weight: "",
+      priority: "Normal",
+    });
+  };
+
+  const handleEditModalClose = () => {
+    setShowEditModal(false);
+    setEditForm({
+      origin: "",
+      destination: "",
+      weight: "",
+      priority: "",
+      status: "",
+    });
   };
 
   const handleView = (shipmentId: string) => {
@@ -133,55 +179,63 @@ const Shipments = () => {
 
         {/* Create Modal */}
         <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Crear Envío</DialogTitle>
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 py-4">
               <div className="space-y-2">
                 <Label>Origen</Label>
-                <Input placeholder="Ciudad de origen" />
+                <CitySelector
+                  value={createForm.origin}
+                  onValueChange={(value) => setCreateForm({ ...createForm, origin: value })}
+                  placeholder="Seleccionar ciudad de origen"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Destino</Label>
-                <Input placeholder="Ciudad de destino" />
+                <CitySelector
+                  value={createForm.destination}
+                  onValueChange={(value) => setCreateForm({ ...createForm, destination: value })}
+                  placeholder="Seleccionar ciudad de destino"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Prioridad</Label>
-                <Select>
+                <Select
+                  value={createForm.priority}
+                  onValueChange={(value) => setCreateForm({ ...createForm, priority: value })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona prioridad" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="alta">Alta</SelectItem>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="baja">Baja</SelectItem>
+                    <SelectItem value="Alta">Alta</SelectItem>
+                    <SelectItem value="Normal">Normal</SelectItem>
+                    <SelectItem value="Baja">Baja</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Estado</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona estado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pendiente">Pendiente</SelectItem>
-                    <SelectItem value="transito">En tránsito</SelectItem>
-                    <SelectItem value="entregado">Entregado</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="p-3 bg-muted rounded-md">
+                  <span className="text-sm text-muted-foreground">Pendiente (predeterminado)</span>
+                </div>
               </div>
               <div className="col-span-2 space-y-2">
                 <Label>Peso</Label>
-                <Input placeholder="Peso en kg" />
+                <Input
+                  placeholder="Peso en kg"
+                  value={createForm.weight}
+                  onChange={(e) => setCreateForm({ ...createForm, weight: e.target.value })}
+                />
               </div>
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+              <Button variant="outline" onClick={handleCreateModalClose}>
                 Cancelar
               </Button>
-              <Button onClick={() => setShowCreateModal(false)}>
+              <Button onClick={handleCreateModalClose}>
                 Guardar
               </Button>
             </div>
@@ -190,37 +244,74 @@ const Shipments = () => {
 
         {/* Edit Modal */}
         <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Editar envío {selectedShipment?.id}</DialogTitle>
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 py-4">
               <div className="space-y-2">
                 <Label>Origen</Label>
-                <Input defaultValue={selectedShipment?.origin} />
+                <CitySelector
+                  value={editForm.origin}
+                  onValueChange={(value) => setEditForm({ ...editForm, origin: value })}
+                  placeholder="Seleccionar ciudad de origen"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Destino</Label>
-                <Input defaultValue={selectedShipment?.destination} />
+                <CitySelector
+                  value={editForm.destination}
+                  onValueChange={(value) => setEditForm({ ...editForm, destination: value })}
+                  placeholder="Seleccionar ciudad de destino"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Prioridad</Label>
-                <Input defaultValue={selectedShipment?.priority} />
+                <Select
+                  value={editForm.priority}
+                  onValueChange={(value) => setEditForm({ ...editForm, priority: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona prioridad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Alta">Alta</SelectItem>
+                    <SelectItem value="Normal">Normal</SelectItem>
+                    <SelectItem value="Baja">Baja</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Estado</Label>
-                <Input defaultValue={selectedShipment?.status} />
+                <Select
+                  value={editForm.status}
+                  onValueChange={(value) => setEditForm({ ...editForm, status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Pendiente">Pendiente</SelectItem>
+                    <SelectItem value="En tránsito">En tránsito</SelectItem>
+                    <SelectItem value="Entregado">Entregado</SelectItem>
+                    <SelectItem value="Novedad">Novedad</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="col-span-2 space-y-2">
                 <Label>Peso</Label>
-                <Input defaultValue={selectedShipment?.weight} />
+                <Input
+                  placeholder="Peso en kg"
+                  value={editForm.weight}
+                  onChange={(e) => setEditForm({ ...editForm, weight: e.target.value })}
+                />
               </div>
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setShowEditModal(false)}>
+              <Button variant="outline" onClick={handleEditModalClose}>
                 Cancelar
               </Button>
-              <Button onClick={() => setShowEditModal(false)}>
+              <Button onClick={handleEditModalClose}>
                 Actualizar
               </Button>
             </div>
