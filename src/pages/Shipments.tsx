@@ -6,17 +6,22 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import { CitySelector } from "@/components/CitySelector";
 import Layout from "@/components/Layout";
 
 const Shipments = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<any>(null);
+  const [shipmentToDelete, setShipmentToDelete] = useState<any>(null);
 
   // Form states for create modal
   const [createForm, setCreateForm] = useState({
@@ -111,6 +116,48 @@ const Shipments = () => {
     navigate(`/shipments/${shipmentId}`);
   };
 
+  const handleDeleteClick = (shipment: any) => {
+    setShipmentToDelete(shipment);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    // Mock delete functionality - in real app would make API call
+    console.log("Deleting shipment:", shipmentToDelete.id);
+    
+    toast({
+      title: "Envío eliminado",
+      description: "El envío ha sido eliminado con éxito"
+    });
+
+    setShowDeleteDialog(false);
+    setShipmentToDelete(null);
+  };
+
+  const handleEditSave = () => {
+    // Mock update functionality - in real app would make API call
+    console.log("Updating shipment:", selectedShipment?.id, editForm);
+    
+    toast({
+      title: "Envío actualizado",
+      description: "El envío ha sido actualizado con éxito"
+    });
+
+    handleEditModalClose();
+  };
+
+  const handleCreateSave = () => {
+    // Mock create functionality - in real app would make API call
+    console.log("Creating shipment:", createForm);
+    
+    toast({
+      title: "Envío creado",
+      description: "El envío ha sido creado con éxito"
+    });
+
+    handleCreateModalClose();
+  };
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -165,7 +212,7 @@ const Shipments = () => {
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="outline" className="text-destructive">
+                        <Button size="sm" variant="outline" className="text-destructive" onClick={() => handleDeleteClick(shipment)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -235,7 +282,7 @@ const Shipments = () => {
               <Button variant="outline" onClick={handleCreateModalClose}>
                 Cancelar
               </Button>
-              <Button onClick={handleCreateModalClose}>
+              <Button onClick={handleCreateSave}>
                 Guardar
               </Button>
             </div>
@@ -311,12 +358,36 @@ const Shipments = () => {
               <Button variant="outline" onClick={handleEditModalClose}>
                 Cancelar
               </Button>
-              <Button onClick={handleEditModalClose}>
+              <Button onClick={handleEditSave}>
                 Actualizar
               </Button>
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Estás seguro de eliminar este envío?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción eliminará permanentemente:
+                <br /><br />
+                • Información de origen y destino<br />
+                • Historial de seguimiento<br />
+                • Documentos adjuntos
+                <br /><br />
+                Esta acción no se puede deshacer.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );
